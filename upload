@@ -1,0 +1,49 @@
+def send_str(file_path, task_str):
+    url = 'http://127.0.0.1:5000/upload'
+
+    headers = {
+        "Content-Type": 'application/json'
+    }
+
+    data = {
+        'file_path': file_path,
+        'task_str': task_str
+    }
+
+    ret = requests.post(url, json=data, headers=headers).json()
+    return ret
+
+
+def send_file(file_name):
+    print(time.time())
+    file_path = ''
+    with open(file_name, "r", encoding='utf-8') as fout:
+        while True:
+            buffer = fout.read(8 *1024*1024)
+            if not buffer:
+                break
+
+            ret = send_str(file_path, buffer)
+            if not ret['flag']:
+                return False
+            file_path = ret['file_path']
+
+    print(time.time())
+    return file_path
+    
+    
+@api.route('/upload', methods=['POST'])
+def upload():
+    data = request.json
+    file_path = data.get('file_path', '')
+
+    if not os.path.exists(file_path):
+        file_name = str(uuid.uuid4()) + '.json'
+        file_path = os.path.join(BASE_PATH, file_name)
+
+    task_str = data['task_str']
+
+    with open(file_path, 'a+', encoding='utf-8') as fw:
+        fw.write(task_str)
+
+    return jsonify({'flag':True, 'file_path':file_path})
