@@ -1,2 +1,2 @@
-# flask
-这是一个flask示例
+# flask+uwsgi+nginx使用
+flask+uwsgi+nginx使用
